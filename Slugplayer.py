@@ -1,70 +1,63 @@
 import sys
-from PyQt5.QtCore import QCoreApplication
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton
+from PyQt5 import QtCore, QtGui, QtWidgets
 import vlc
+from VLCManager import VLCManager
 
-player = vlc.MediaPlayer("/songs/Immigrant Song.mp3")
-class window(QMainWindow):
-    
 
+class window(QtWidgets.QMainWindow):    
     def __init__(self):
         super(window, self).__init__()
-        self.setGeometry(50, 50, 400, 200)
+        idx = 0
+
+        self._manager = VLCManager(0, 0, 0)
+        self._manager.setFileName("/songs/Immigrant Song.mp3")
         self.setWindowTitle('SlugPlayer')
-        #self.setWindowIcon(QIcon('pic.png'))
-        
         self.home()
 
     def home(self):
-        btn = QPushButton('quit', self)
-        btn.clicked.connect(self.close_application)
+        quitbtn = QtWidgets.QPushButton('quit')
+        quitbtn.clicked.connect(self.close)
 
-        btn.resize(btn.sizeHint())  #set to acceptable size automatic
-        btn.move(0, 0)
+        playbtn = QtWidgets.QPushButton('Play')
+        playbtn.clicked.connect(self._manager.play)
 
-        playbtn = QPushButton('Play', self)
-        
-        playbtn.clicked.connect(self.play_music)
+        psebtn = QtWidgets.QPushButton('Pause', self)
+        psebtn.clicked.connect(self._manager.pause)
 
-        playbtn.resize(playbtn.sizeHint())
-        playbtn.move(100, 0)
+        stopbtn = QtWidgets.QPushButton('Stop', self)
+        stopbtn.clicked.connect(self._manager.stop)
 
-        psebtn = QPushButton('Pause', self)
-        
-        psebtn.clicked.connect(self.pause_music)
+        test1 = QtWidgets.QPushButton('Test1', self)
+        test1.clicked.connect(self._manager.test1)
 
-        psebtn.resize(psebtn.sizeHint())
-        psebtn.move(200, 0)
+        test2 = QtWidgets.QPushButton('Test2', self)
+        test2.clicked.connect(self._manager.test2)
 
-        stopbtn = QPushButton('Stop', self)
-        
-        stopbtn.clicked.connect(self.stop_music)
+        test3 = QtWidgets.QPushButton('Test3', self)
+        test3.clicked.connect(self._manager.test3)
+        rand = QtWidgets.QPushButton('Random', self)
+        rand.clicked.connect(self._manager.randomize)
 
-        stopbtn.resize(stopbtn.sizeHint())
-        stopbtn.move(300, 0)
+        self.sl = QtWidgets.QSlider(orientation=QtCore.Qt.Horizontal)
+        self.sl.setFocusPolicy(QtCore.Qt.NoFocus)
+        self._manager.durationChanged.connect(self.sl.setMaximum)
+        self._manager.positionChanged.connect(self.sl.setValue)
 
+        central_widget = QtWidgets.QWidget()
+        self.setCentralWidget(central_widget)
+        lay = QtWidgets.QVBoxLayout(central_widget)
 
-
+        hlay = QtWidgets.QHBoxLayout()
+        for b in (quitbtn, playbtn, psebtn, stopbtn, test1, test2, test3, rand ):
+            hlay.addWidget(b)
+        lay.addLayout(hlay)
+        lay.addWidget(self.sl)
+        self.sl.valueChanged[int].connect(self._manager.setPosition)
         self.show()
 
-    def close_application(self):
-        sys.exit()
-
-    def play_music(self):
-        player.play()
-
-
-    def pause_music(self):
-        player.pause()
-
-    def stop_music(self):
-        player.stop()
-
 def run():
-    app = QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     Gui = window()
     sys.exit(app.exec_())
-   
 
 run()
